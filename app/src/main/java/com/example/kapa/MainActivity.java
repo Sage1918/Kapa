@@ -1,14 +1,98 @@
 package com.example.kapa;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.Bundle;
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
+
+    private Button FbButton;
+    private Button MailButton;
+    private Button PhoneButton;
+    CallbackManager callbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        FbButton = findViewById(R.id.LoginFacebook);
+        MailButton = findViewById(R.id.LoginMail);
+        PhoneButton = findViewById(R.id.LoginPhone);
+        callbackManager = CallbackManager.Factory.create();
+
+        // com.facebook.AccessToken represents immutable access token and it's metadata like whether it expired or not. See documentation for more info.
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+
+        // If user still logged in then no need to make them go through the login screen again.
+        if(accessToken != null && !accessToken.isExpired())
+        {
+            startActivity(new Intent(MainActivity.this,UserStandBy.class));
+            finish();
+        }
+
+        LoginManager.getInstance().registerCallback(callbackManager,
+                new FacebookCallback<LoginResult>() {
+                    @Override
+                    public void onSuccess(LoginResult loginResult) {
+                        // App code
+                        // This will be changed to check with the database whether the account is already registered or is it new, Before moving to next activity.
+                        startActivity(new Intent(MainActivity.this,UserStandBy.class));
+                        finish();
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        // App code
+                        Toast.makeText(MainActivity.this, "Failed to login", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(@NonNull FacebookException exception) {
+                        // App code
+                        Toast.makeText(MainActivity.this, "Failed to login", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+
+        FbButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LoginManager.getInstance().logInWithReadPermissions(MainActivity.this, Arrays.asList("public_profile"));
+            }
+        });
+
+        /* The v-> {} is a lambda function in java... as suggested by Android Studio.
+        The setOnClickListener() method takes in an object of class android.view.View
+        the View class is the Parent class of all views used in the android app.
+        The TextView,Button etc all inherit from the View class.
+        */
+
+        /* Toast
+            It is a short message/pop up in grey(but it can also be in other colours) giving certain information.
+            Usually it doesn't interact with the user but it can be made to do so.
+         */
+        MailButton.setOnClickListener(v -> Toast.makeText(MainActivity.this,"NOT IMPLEMENTED YET",Toast.LENGTH_SHORT).show());
+
+        PhoneButton.setOnClickListener(v -> Toast.makeText(MainActivity.this,"NOT IMPLEMENTED YET",Toast.LENGTH_SHORT).show());
+    }
+
+      @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }
