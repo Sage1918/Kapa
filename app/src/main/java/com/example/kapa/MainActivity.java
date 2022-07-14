@@ -2,7 +2,6 @@ package com.example.kapa;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -13,10 +12,9 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 
-import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button fbButton = findViewById(R.id.LoginFacebook);
+        LoginButton fbButton = findViewById(R.id.LoginFacebook);
         Button mailButton = findViewById(R.id.LoginMail);
         Button phoneButton = findViewById(R.id.LoginPhone);
         callbackManager = CallbackManager.Factory.create();
@@ -47,7 +45,8 @@ public class MainActivity extends AppCompatActivity {
             finish();
         }
 
-        LoginManager.getInstance().registerCallback(callbackManager,
+        fbButton.setPermissions("user_friends");
+        fbButton.registerCallback(callbackManager,
                 new FacebookCallback<LoginResult>() {
                     @Override
                     public void onSuccess(LoginResult loginResult) {
@@ -74,13 +73,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-
-        fbButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LoginManager.getInstance().logInWithReadPermissions(MainActivity.this, Arrays.asList("public_profile"));
-            }
-        });
 
         /* The v-> {} is a lambda function in java... as suggested by Android Studio.
         The setOnClickListener() method takes in an object of class android.view.View

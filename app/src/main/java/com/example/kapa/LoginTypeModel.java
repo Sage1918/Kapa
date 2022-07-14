@@ -1,31 +1,37 @@
 package com.example.kapa;
 
 public class LoginTypeModel {
-    public String fb_id;
-    public int ph_no;
-    public String mail;
+    public String Uid;
+    public String loginId;
+    public String loginType;
 
-    public String getFb_id() {
-        return fb_id;
+    public LoginTypeModel() {
+
     }
 
-    public void setFb_id(String fb_id) {
-        this.fb_id = fb_id;
+    public String getLoginId() {
+        return loginId;
     }
 
-    public int getPh_no() {
-        return ph_no;
+    public void setLoginId(String loginId) {
+        this.loginId = loginId;
     }
 
-    public void setPh_no(int ph_no) {
-        this.ph_no = ph_no;
+    public String getLoginType() {
+        return loginType;
     }
 
-    public String getMail() {
-        return mail;
+    public void setLoginType(String loginType) {
+        this.loginType = loginType;
     }
 
-    public void setMail(String mail) {
-        this.mail = mail;
+    public String getUid() {
+        return Uid;
     }
+
+    public void setUid(String uid) {
+        Uid = uid;
+    }
+
+
 }
