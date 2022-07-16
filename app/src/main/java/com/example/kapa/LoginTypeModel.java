@@ -1,12 +1,20 @@
 package com.example.kapa;
 
 public class LoginTypeModel {
-    public String Uid;
+    public String userid;
     public String loginId;
     public String loginType;
 
     public LoginTypeModel() {
 
+    }
+
+    public String getUserid() {
+        return userid;
+    }
+
+    public void setUserid(String my_uid) {
+        this.userid = my_uid;
     }
 
     public String getLoginId() {
@@ -24,14 +32,4 @@ public class LoginTypeModel {
     public void setLoginType(String loginType) {
         this.loginType = loginType;
     }
-
-    public String getUid() {
-        return Uid;
-    }
-
-    public void setUid(String uid) {
-        Uid = uid;
-    }
-
-
 }

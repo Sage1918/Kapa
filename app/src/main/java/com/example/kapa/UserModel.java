@@ -1,7 +1,7 @@
 package com.example.kapa;
 
 public class UserModel {
-    public String uid;
+    public String userStrId;
     public String uname;
     public String mode;
     public int score;
@@ -11,12 +11,12 @@ public class UserModel {
 
     }
 
-    public String getUid() {
-        return uid;
+    public String getUserStrId() {
+        return userStrId;
     }
 
-    public void setUid(String uid) {
-        this.uid = uid;
+    public void setUserStrId(String userStrId) {
+        this.userStrId = userStrId;
     }
 
     public String getUname() {

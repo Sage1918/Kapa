@@ -3,15 +3,15 @@ package com.example.kapa;
 public class FriendsModel {
     public String name;
     public String fb_id;
-    public String Uid;
+    public String friendUid;
 
     public FriendsModel() {
     }
 
-    public FriendsModel(String name, String fb_id, String uid) {
+    public FriendsModel(String name, String fb_id, String fruid) {
         this.name = name;
         this.fb_id = fb_id;
-        Uid = uid;
+        friendUid = fruid;
     }
 
     public String getName() {
@@ -22,7 +22,7 @@ public class FriendsModel {
         return fb_id;
     }
 
-    public String getUid() {
-        return Uid;
+    public String getFriendUid() {
+        return friendUid;
     }
 }
