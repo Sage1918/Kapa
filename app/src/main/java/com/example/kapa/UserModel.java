@@ -1,13 +1,9 @@
 package com.example.kapa;
 
-import java.util.ArrayList;
-
 public class UserModel {
-    public int uid;
+    public String userStrId;
     public String uname;
-    public LoginTypeModel lt;
     public String mode;
-    public ArrayList<UserModel> friends;
     public int score;
 
     public UserModel()
@@ -15,20 +11,12 @@ public class UserModel {
 
     }
 
-    public int getUid() {
-        return uid;
+    public String getUserStrId() {
+        return userStrId;
     }
 
-    public void setUid(int uid) {
-        this.uid = uid;
-    }
-
-    public LoginTypeModel getLt() {
-        return lt;
-    }
-
-    public void setLt(LoginTypeModel lt) {
-        this.lt = lt;
+    public void setUserStrId(String userStrId) {
+        this.userStrId = userStrId;
     }
 
     public String getUname() {
@@ -45,14 +33,6 @@ public class UserModel {
 
     public void setMode(String mode) {
         this.mode = mode;
-    }
-
-    public ArrayList<UserModel> getFriends() {
-        return friends;
-    }
-
-    public void setFriends(ArrayList<UserModel> friends) {
-        this.friends = friends;
     }
 
     public int getScore() {
