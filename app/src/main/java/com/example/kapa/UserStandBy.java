@@ -1,6 +1,7 @@
 package com.example.kapa;
 
 import static android.util.Log.d;
+import static android.util.Log.println;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,11 +26,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 
 public class UserStandBy extends AppCompatActivity {
 
@@ -40,6 +39,9 @@ public class UserStandBy extends AppCompatActivity {
     boolean isNewUser;
     private String userMode;
     private FirebaseDatabase database;
+    TextView greet;
+    Button driver,passenger;
+
 
 
     @Override
@@ -71,8 +73,8 @@ public class UserStandBy extends AppCompatActivity {
                             if (jsonObject != null) {
                                 fb_id = jsonObject.getString("id");
                                 fb_name = jsonObject.getString("name");
-
-
+                                greet = findViewById(R.id.greet);
+                                greet.setText("Hello "+fb_name);
 
 
 
@@ -110,7 +112,8 @@ public class UserStandBy extends AppCompatActivity {
                                             else
                                             {
                                                 Log.d("Database Search RESULT", "SEARCHED and FOUND");
-                                                //getFriends();
+                                                Toast.makeText(UserStandBy.this, "User found in database", Toast.LENGTH_SHORT).show();
+                                                getDetails(my_Uid);
                                             }
                                         }
 
@@ -129,8 +132,6 @@ public class UserStandBy extends AppCompatActivity {
 
 
                                 Log.d("isNewUser",(isNewUser)?"Ture":"Flase");
-                                TextView v = findViewById(R.id.Uid);
-                                v.setText(fb_id);
 
 
                             }
@@ -146,6 +147,76 @@ public class UserStandBy extends AppCompatActivity {
 
 
 
+    }
+
+    private void getDetails(String id) {
+
+        DatabaseReference myRef = database.getReference("user").child(id);
+        Toast.makeText(this, id, Toast.LENGTH_SHORT).show();
+
+        Query query = myRef.orderByChild("mode");
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot i : snapshot.getChildren())
+                    if(i.getKey().equals("mode"))
+                    userMode = i.getValue().toString();
+
+                if (userMode.equals("None")) {
+                    driver = findViewById(R.id.DriverButton);
+                    passenger = findViewById(R.id.PassengerButton);
+
+                    driver.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent i = new Intent(UserStandBy.this, DriverActivity.class);
+                            i.putExtra("userid", id);
+                            i.putExtra("name", fb_name);
+
+                            startActivity(i);
+                            finish();
+                        }
+                    });
+
+                    passenger.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent i = new Intent(UserStandBy.this, PassengerActivity.class);
+                            i.putExtra("userid", id);
+                            i.putExtra("name", fb_name);
+
+                            startActivity(i);
+                            finish();
+                        }
+                    });
+                }
+                else if (userMode.equals("Driver")) {
+                    Intent i = new Intent(UserStandBy.this, DriverActivity.class);
+                    i.putExtra("userid", id);
+                    i.putExtra("name", fb_name);
+
+                    startActivity(i);
+                    finish();
+                }
+                else if (userMode.equals("Passenger"))
+                {
+                    Intent i = new Intent(UserStandBy.this, PassengerActivity.class);
+                            i.putExtra("userid", id);
+                            i.putExtra("name", fb_name);
+
+                            startActivity(i);
+                            finish();
+                }
+                else
+                    Log.e("MAJOR ERROR","Something wrong with user mode from Database");
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("Database",error.getMessage());
+            }
+        });
     }
 /*
     //private void searchDb(String f_id)
@@ -205,7 +276,7 @@ public class UserStandBy extends AppCompatActivity {
 
             */
     }
-
+/*
     private void getFriends()
     {
         //ArrayList<String> friends;
@@ -239,6 +310,6 @@ public class UserStandBy extends AppCompatActivity {
 
         reqUserFriends.executeAsync();
 
-        */
     }
+        */
 }
