@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "933798347289",
+    "project_id": "kapa-ce822",
+    "storage_bucket": "kapa-ce822.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:933798347289:android:4aa0d31585d175cfe5e088",
+        "android_client_info": {
+          "package_name": "com.example.kapa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "933798347289-15aj1hlocmboirqtk5hbqf2dkfk4o425.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7Bm3K1dhpzaYBIYvF2vwKEn16Z_0O8zY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "933798347289-15aj1hlocmboirqtk5hbqf2dkfk4o425.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
