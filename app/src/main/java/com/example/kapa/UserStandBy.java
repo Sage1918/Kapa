@@ -112,7 +112,7 @@ public class UserStandBy extends AppCompatActivity {
                                             else
                                             {
                                                 Log.d("Database Search RESULT", "SEARCHED and FOUND");
-                                                Toast.makeText(UserStandBy.this, "User found in database", Toast.LENGTH_SHORT).show();
+
                                                 getDetails(my_Uid);
                                             }
                                         }
@@ -152,8 +152,6 @@ public class UserStandBy extends AppCompatActivity {
     private void getDetails(String id) {
 
         DatabaseReference myRef = database.getReference("user").child(id);
-        Toast.makeText(this, id, Toast.LENGTH_SHORT).show();
-
         Query query = myRef.orderByChild("mode");
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
