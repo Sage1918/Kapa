@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.kapa">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.kapa" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -11,8 +12,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_kapa_logo_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Kapa">
-
+        android:theme="@style/Theme.Kapa" >
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
         <!--
              TODO: Before you run your application, you need a Google Maps API key.
 
@@ -50,8 +53,9 @@
             android:name=".UserStandBy"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:name=".Splash"
+            android:exported="true"
+            tools:ignore="DuplicateActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
