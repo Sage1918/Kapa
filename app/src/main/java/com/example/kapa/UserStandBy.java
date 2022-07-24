@@ -1,7 +1,6 @@
 package com.example.kapa;
 
 import static android.util.Log.d;
-import static android.util.Log.println;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -199,11 +198,11 @@ public class UserStandBy extends AppCompatActivity {
                 else if (userMode.equals("Passenger"))
                 {
                     Intent i = new Intent(UserStandBy.this, PassengerActivity.class);
-                            i.putExtra("userid", id);
-                            i.putExtra("name", fb_name);
+                    i.putExtra("userid", id);
+                    i.putExtra("name", fb_name);
 
-                            startActivity(i);
-                            finish();
+                    startActivity(i);
+                    finish();
                 }
                 else
                     Log.e("MAJOR ERROR","Something wrong with user mode from Database");

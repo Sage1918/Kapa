@@ -7,18 +7,6 @@
     tools:context=".DriverActivity">
 
     <TextView
-        android:id="@+id/waitMsg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="You have already entered the Driver details, come back when its time"
-        android:textSize="30sp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
         android:id="@+id/readyMsg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -111,7 +99,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="16dp"
-        android:text="Select"
+        android:text="@string/selectprompt"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.908"
@@ -123,7 +111,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Select"
+        android:text="@string/selectprompt"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="@+id/fromSelectionBtn"
         app:layout_constraintStart_toStartOf="@+id/fromSelectionBtn"
@@ -131,24 +119,24 @@
 
     <EditText
         android:id="@+id/noOfSeatsEnteredByDriver"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="149dp"
+        android:layout_height="50dp"
         android:layout_marginEnd="16dp"
         android:ems="10"
-        android:inputType="number"
         android:hint="number of seats"
+        android:inputType="number"
+        android:textSize="20sp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/noOfSeats"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/noOfSeats" />
 
-    <EditText
+    <Button
         android:id="@+id/timeOfCarpoolEntered"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:ems="10"
-        android:inputType="datetime"
+        android:text="@string/selectprompt"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/timeOfCarpool"
         app:layout_constraintEnd_toEndOf="parent"
@@ -163,7 +151,56 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dateOfCarpool" />
+
+    <TextView
+        android:id="@+id/dateOfCarpool"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="48dp"
+        android:text="Date"
+        android:textSize="20sp"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/timeOfCarpool" />
 
+    <Button
+        android:id="@+id/dateOfCarpoolEntered"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="@string/selectprompt"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/dateOfCarpool"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/dateOfCarpool" />
+
+    <TextView
+        android:id="@+id/reqMsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Passengers Requesting Car pool"
+        android:textSize="30sp"
+        android:textAlignment="center"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!--
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_req"
+        android:layout_width="409dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/reqMsg" />
+
+     -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
