@@ -30,8 +30,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
 
         type = getIntent().getStringExtra("type");
-        if(!type.equals("select"))
-            findViewById(R.id.select_button_in_map).setVisibility(View.INVISIBLE);
+        //if(!type.equals("select"))
+          //  findViewById(R.id.select_button_in_map).setVisibility(View.INVISIBLE);
 
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
@@ -58,15 +58,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        LatLng kerala = new LatLng(10, 76);
+        mMap.addMarker(new MarkerOptions().position(kerala).title("A default Marker"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(kerala));
         if(type.equals("select"))
         {
             //Waiting for the map to load
             while(mMap == null);
             mapMakeSelection();
         }
+        else if(type.equals("seeOnMap"))
+        {
+            //Waiting for the map to load
+            while(mMap == null);
+            seeOnMap();
+        }
+    }
+
+    private void seeOnMap() {
+        // TODO make intent things visible on map
+
+        Intent i = getIntent();
+        Double lt,lg;
+        lt = i.getDoubleExtra("lat",0);
+        lg = i.getDoubleExtra("log",0);
+        MarkerOptions myMOptions = new MarkerOptions();
+        myMOptions.title("Pick up from here");
+        myMOptions.position(new LatLng(lt,lg));
+        mMap.clear();
+        mMap.addMarker(myMOptions);
+        selectBtn = findViewById(R.id.select_button_in_map);
+        selectBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
     private void mapMakeSelection() {
@@ -100,12 +127,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onMapClick(@NonNull LatLng latLng) {
 
-                myMarker = latLng;
-                myMOptions.position(myMarker).title("From here");
+                myMOptions.position(latLng).title("Here");
                 myMOptions.position(latLng);
                 mMap.clear();
                 mMap.addMarker(myMOptions);
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(myMarker));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
             }
         });
 

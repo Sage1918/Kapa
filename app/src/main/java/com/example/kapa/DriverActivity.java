@@ -32,6 +32,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Calendar;
+import java.util.List;
 
 public class DriverActivity extends AppCompatActivity {
 
@@ -41,13 +42,14 @@ public class DriverActivity extends AppCompatActivity {
     private TextView notTime,ready,driverDetail,from,to,time,noOfSeats,date,reqMsg;
     private Button start,selectFrom,selectTo,done,timeEnter,dateEnter;
     private EditText noOfSeatsEnter;
-    //private RecyclerView recyclerView;
-    //private RecyclerView.Adapter adapter;
-    //private RecyclerView.LayoutManager layoutManager;
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter adapter;
+    private RecyclerView.LayoutManager layoutManager;
     private boolean[] checks;
     private DriverModel driver;
 
     Calendar cal;
+    List<MyRequestModel> myRequestModelList;
 
     ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
@@ -117,13 +119,15 @@ public class DriverActivity extends AppCompatActivity {
         noOfSeatsEnter = findViewById(R.id.noOfSeatsEnteredByDriver);
 
         // Initialising recycler view
-        //recyclerView = findViewById(R.id.rv_req);
-        //layoutManager = new LinearLayoutManager(this);
-        //adapter
+        recyclerView = findViewById(R.id.rv_req);
+        layoutManager = new LinearLayoutManager(this);
 
-        //recyclerView.setHasFixedSize(true);
-        //recyclerView.setLayoutManager(layoutManager);
-        //recyclerView.setAdapter(adapter);
+
+        // The fixed size statement is to improve performance as it can be sure that it doesn't have to change size, see docs for more details...
+        recyclerView.setHasFixedSize(true);
+        // Using a linear layout... i don't know why ??
+        recyclerView.setLayoutManager(layoutManager);
+
         // Passing an object to an inner class requires it to be final, so android studio made me do this.
         final String[] dbTime = new String[1];
 
@@ -144,19 +148,91 @@ public class DriverActivity extends AppCompatActivity {
                 }
                 else
                 {
-                    //TODO check time of Car Pool and if system time is close to it then prompt for next activity: The MapActivity
-                    Toast.makeText(DriverActivity.this, "The driver is found in Driver node of Database", Toast.LENGTH_SHORT).show();
-                    for(DataSnapshot i : snapshot.getChildren())
-                    {
-                        if(i.getKey().equals("time"))
-                            dbTime[0] = i.getValue().toString();
-                    }
+                    // Driver already set up driving
+                    // Check whether it's time for ride first, followed by any more requests
+                    checkRideTime();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e("Database",error.getMessage());
+            }
+        });
+    }
+
+    private void checkRideTime() {
+        // TODO check whether its time to Carpool or not
+        DatabaseReference myRef = database.getReference("driver");
+        Query query = myRef.orderByChild(user_id);
+        query.addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.exists()) {
+                            for (DataSnapshot i : snapshot.getChildren()) {
+                                driver = i.getValue(DriverModel.class);
+                            }
+
+                            int myDate = Calendar.YEAR*10000 + (Calendar.MONTH + 1)*100 + Calendar.DAY_OF_MONTH;
+                            Log.d("TodayDate",String.valueOf(myDate));
+                            if(driver.getDate() < myDate) {
+                                showRequestView();
+                                seeRequests();
+                            }
+                            else if (driver.getDate() == myDate) {
+
+                                int myTime;
+
+                                myTime = Calendar.HOUR_OF_DAY * 100 + Calendar.MINUTE;
+                                if (driver.getTime() < myTime) {
+                                    showRequestView();
+                                    seeRequests();
+                                } else {
+                                    showReadyView();
+                                    // TODO start MapActivity accordingly...
+                                    Toast.makeText(DriverActivity.this, "Time to start Carpool...", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e("DatabaseERROR",error.getMessage());
+                    }
+                }
+        );
+    }
+
+    private void seeRequests() {
+        DatabaseReference myRef = database.getReference("request");
+        Query query = myRef.orderByChild("driverId");
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!snapshot.exists())
+                {
+                    Toast.makeText(DriverActivity.this, "No new Carpool Requests", Toast.LENGTH_SHORT).show();
+                    recyclerView.setVisibility(View.INVISIBLE);
+                }
+                else
+                {
+                    for(DataSnapshot i : snapshot.getChildren())
+                    {
+                        MyRequestModel temp;
+                        temp = i.getValue(MyRequestModel.class);
+                        myRequestModelList.add(temp);
+                    }
+
+                    adapter = new AdapterRequestListRv(myRequestModelList, DriverActivity.this);
+                    recyclerView.setAdapter(adapter);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("DatabaseERROR",error.getMessage());
             }
         });
     }
@@ -350,6 +426,7 @@ public class DriverActivity extends AppCompatActivity {
         ready.setVisibility(View.INVISIBLE);
         start.setVisibility(View.INVISIBLE);
         reqMsg.setVisibility(View.INVISIBLE);
+        recyclerView.setVisibility(View.INVISIBLE);
 
         driverDetail.setVisibility(View.VISIBLE);
         from.setVisibility(View.VISIBLE);
@@ -376,6 +453,23 @@ public class DriverActivity extends AppCompatActivity {
     {
         // TODO changes the layout to show all Views that are need to be shown to facilitate accepting and rejecting of ride requests from the passengers
         // This will be displayed by the Recycler View
+        ready.setVisibility(View.INVISIBLE);
+        start.setVisibility(View.INVISIBLE);
+        reqMsg.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.VISIBLE);
 
+        driverDetail.setVisibility(View.INVISIBLE);
+        from.setVisibility(View.INVISIBLE);
+        to.setVisibility(View.INVISIBLE);
+        noOfSeats.setVisibility(View.INVISIBLE);
+        time.setVisibility(View.INVISIBLE);
+        date.setVisibility(View.INVISIBLE);
+
+        selectTo.setVisibility(View.INVISIBLE);
+        selectFrom.setVisibility(View.INVISIBLE);
+        noOfSeatsEnter.setVisibility(View.INVISIBLE);
+        timeEnter.setVisibility(View.INVISIBLE);
+        dateEnter.setVisibility(View.INVISIBLE);
+        done.setVisibility(View.INVISIBLE);
     }
 }

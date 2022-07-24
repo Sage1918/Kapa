@@ -11,4 +11,6 @@ public class PassengerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_passenger);
     }
+
+    // TODO use MyREquest model when pushing to DATABASE
 }
