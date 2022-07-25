@@ -12,6 +12,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.kapa.databinding.ActivityMapsBinding;
@@ -60,33 +62,45 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Add a marker in Sydney and move the camera
         LatLng kerala = new LatLng(10, 76);
         mMap.addMarker(new MarkerOptions().position(kerala).title("A default Marker"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(kerala));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(kerala,10f));
+        mMap.clear();
         if(type.equals("select"))
         {
-            //Waiting for the map to load
-            while(mMap == null);
             mapMakeSelection();
         }
         else if(type.equals("seeOnMap"))
         {
-            //Waiting for the map to load
-            while(mMap == null);
             seeOnMap();
         }
     }
 
     private void seeOnMap() {
         // TODO make intent things visible on map
-
-        Intent i = getIntent();
-        Double lt,lg;
-        lt = i.getDoubleExtra("lat",0);
-        lg = i.getDoubleExtra("log",0);
-        MarkerOptions myMOptions = new MarkerOptions();
-        myMOptions.title("Pick up from here");
-        myMOptions.position(new LatLng(lt,lg));
         mMap.clear();
-        mMap.addMarker(myMOptions);
+        Intent i = getIntent();
+        Double lt, lg;
+        lt = i.getDoubleExtra("lat", 0);
+        lg = i.getDoubleExtra("log", 0);
+        MarkerOptions myMOptions = new MarkerOptions();
+        if (i.getStringExtra("subtype") != null) {
+            myMOptions.title("To here");
+            myMOptions.position(new LatLng(lt,lg));
+            mMap.addMarker(myMOptions);
+            MarkerOptions fromHere = new MarkerOptions();
+            lt = i.getDoubleExtra("flat",0);
+            lg = i.getDoubleExtra("flog",0);
+            fromHere.title("From here");
+            fromHere.position(new LatLng(lt,lg));
+            fromHere.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+            mMap.addMarker(fromHere);
+        }
+        else
+        {
+            myMOptions.title("Pick up from here");
+            myMOptions.position(new LatLng(lt, lg));
+            mMap.addMarker(myMOptions);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lt,lg),10f));
+        }
         selectBtn = findViewById(R.id.select_button_in_map);
         selectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,6 +133,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         setResult(100,intent);
                     else if(identifier.equals("to"))
                         setResult(101,intent);
+                    else if(identifier.equals("pickup"))
+                        setResult(102,intent);
                     finish();
                 }
             }
@@ -127,6 +143,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onMapClick(@NonNull LatLng latLng) {
 
+                myMarker = latLng;
                 myMOptions.position(latLng).title("Here");
                 myMOptions.position(latLng);
                 mMap.clear();

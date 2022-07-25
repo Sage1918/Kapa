@@ -6,7 +6,7 @@ public class MyRequestModel {
     public String passengerId;
     public String name;
     public Double pickupLat;
-    public Double PickupLong;
+    public Double pickupLong;
 
     public MyRequestModel() {
     }
@@ -16,7 +16,7 @@ public class MyRequestModel {
         this.passengerId = passengerId;
         this.name = name;
         this.pickupLat = pickupLat;
-        PickupLong = pickupLong;
+        this.pickupLong = pickupLong;
     }
 
     public String getDriverId() {
@@ -36,6 +36,6 @@ public class MyRequestModel {
     }
 
     public Double getPickupLong() {
-        return PickupLong;
+        return pickupLong;
     }
 }

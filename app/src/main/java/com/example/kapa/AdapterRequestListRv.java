@@ -1,5 +1,6 @@
 package com.example.kapa;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -32,18 +33,19 @@ public class AdapterRequestListRv extends RecyclerView.Adapter<AdapterRequestLis
         return holder;
     }
 
+    //Dirty way of solving the "position variable is not fixed" concern of Android Studio
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
         holder.nameOfRequestee.setText(myRequestModelList.get(position).name);
-        holder.lati.setText(String.valueOf(myRequestModelList.get(position).getPickupLat()));
-        holder.longi.setText(String.valueOf(myRequestModelList.get(position).getPickupLong()));
+        holder.lati.setText("latitude: " + String.valueOf(myRequestModelList.get(position).getPickupLat()));
+        holder.longi.setText("longitude: " + String.valueOf(myRequestModelList.get(position).getPickupLong()));
 
         holder.rv_seeOnMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 double lt,lg;
-                lt = Double.parseDouble(holder.lati.getText().toString());
-                lg = Double.parseDouble(holder.longi.getText().toString());
+                lt = myRequestModelList.get(position).getPickupLat();
+                lg = myRequestModelList.get(position).getPickupLong();
 
                 Intent i = new Intent(context,MapsActivity.class);
 
@@ -60,8 +62,6 @@ public class AdapterRequestListRv extends RecyclerView.Adapter<AdapterRequestLis
             @Override
             public void onClick(View v) {
                 // TODO accept the passenger and add to final carpool node. May disable both accept and reject button for this entry now...
-
-
 
                 holder.rv_reject.setVisibility(View.INVISIBLE);
                 holder.rv_accept.setVisibility(View.INVISIBLE);

@@ -2,6 +2,7 @@ package com.example.kapa;
 
 public class DriverModel {
     private String user_id;
+    private String user_name;
 
     private double from_latitude;
 
@@ -11,8 +12,8 @@ public class DriverModel {
     private double to_longitude;
     private int numberOfSeats;
     private int time;
-
     private int date;
+
     public DriverModel() {
     }
     public void setUser_id(String user_id) {
@@ -47,6 +48,10 @@ public class DriverModel {
         this.date = date;
     }
 
+    public void setUser_name(String user_name) {
+        this.user_name = user_name;
+    }
+
     public String getUser_id() {
         return user_id;
     }
@@ -77,5 +82,9 @@ public class DriverModel {
 
     public int getDate() {
         return date;
+    }
+
+    public String getUser_name() {
+        return user_name;
     }
 }

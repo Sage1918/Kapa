@@ -31,6 +31,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -69,7 +70,6 @@ public class DriverActivity extends AppCompatActivity {
 
                             String newTemp = "From:\n" + driver.getFrom_latitude() + ", \n" + driver.getFrom_longitude();
                             from.setText(newTemp);
-                            selectFrom.setVisibility(View.INVISIBLE);
                         }
                     }
                     else if(result.getResultCode() == 101)
@@ -84,7 +84,6 @@ public class DriverActivity extends AppCompatActivity {
 
                             String newTemp = "To:\n" + driver.getTo_latitude() + ", \n" + driver.getTo_longitude();
                             to.setText(newTemp);
-                            selectTo.setVisibility(View.INVISIBLE);
                         }
                     }
                 }
@@ -118,6 +117,9 @@ public class DriverActivity extends AppCompatActivity {
         // Initialising all editTexts in the layout
         noOfSeatsEnter = findViewById(R.id.noOfSeatsEnteredByDriver);
 
+        // Intialise the list of Requests
+        myRequestModelList = new ArrayList<MyRequestModel>();
+
         // Initialising recycler view
         recyclerView = findViewById(R.id.rv_req);
         layoutManager = new LinearLayoutManager(this);
@@ -135,8 +137,8 @@ public class DriverActivity extends AppCompatActivity {
         for(int i=0;i<3;++i)
             checks[i] = false;
 
-        DatabaseReference myRef = database.getReference("drivers");
-        Query query = myRef.orderByChild("user_id");
+        DatabaseReference myRef = database.getReference("driver");
+        Query query = myRef.orderByChild("user_id").equalTo(user_id);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -144,6 +146,7 @@ public class DriverActivity extends AppCompatActivity {
                 {
                     driver = new DriverModel();
                     driver.setUser_id(user_id);
+                    driver.setUser_name(fb_name);
                     addDriver();
                 }
                 else
@@ -164,7 +167,7 @@ public class DriverActivity extends AppCompatActivity {
     private void checkRideTime() {
         // TODO check whether its time to Carpool or not
         DatabaseReference myRef = database.getReference("driver");
-        Query query = myRef.orderByChild(user_id);
+        Query query = myRef.orderByChild("user_id").equalTo(user_id);
         query.addListenerForSingleValueEvent(
                 new ValueEventListener() {
                     @Override
@@ -174,9 +177,10 @@ public class DriverActivity extends AppCompatActivity {
                                 driver = i.getValue(DriverModel.class);
                             }
 
-                            int myDate = Calendar.YEAR*10000 + (Calendar.MONTH + 1)*100 + Calendar.DAY_OF_MONTH;
+                            cal = Calendar.getInstance();
+                            int myDate = cal.get(cal.YEAR)*10000 + (cal.get(cal.MONTH)+1)*100 + cal.get(cal.DAY_OF_MONTH);
                             Log.d("TodayDate",String.valueOf(myDate));
-                            if(driver.getDate() < myDate) {
+                            if(driver.getDate() > myDate) {
                                 showRequestView();
                                 seeRequests();
                             }
@@ -184,8 +188,8 @@ public class DriverActivity extends AppCompatActivity {
 
                                 int myTime;
 
-                                myTime = Calendar.HOUR_OF_DAY * 100 + Calendar.MINUTE;
-                                if (driver.getTime() < myTime) {
+                                myTime = cal.get(Calendar.HOUR_OF_DAY) * 100 + cal.get(Calendar.MINUTE);
+                                if (driver.getTime() > myTime) {
                                     showRequestView();
                                     seeRequests();
                                 } else {
@@ -206,8 +210,8 @@ public class DriverActivity extends AppCompatActivity {
     }
 
     private void seeRequests() {
-        DatabaseReference myRef = database.getReference("request");
-        Query query = myRef.orderByChild("driverId");
+        DatabaseReference myRef = database.getReference("request").child(user_id);
+        Query query = myRef.orderByChild("passengerId");
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -227,6 +231,7 @@ public class DriverActivity extends AppCompatActivity {
 
                     adapter = new AdapterRequestListRv(myRequestModelList, DriverActivity.this);
                     recyclerView.setAdapter(adapter);
+                    recyclerView.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -289,7 +294,6 @@ public class DriverActivity extends AppCompatActivity {
 
                                 // Ternary operator for aesthetic display of values sake...
                                 time.setText("Time:\n" + ((selectTime/100 == 0)?"00":selectTime/100) + ":" + ((selectTime % 100 ==0)?"00":selectTime % 100));
-                                timeEnter.setVisibility(View.INVISIBLE);
                             }
                         },12,0,false
                 );
@@ -326,6 +330,21 @@ public class DriverActivity extends AppCompatActivity {
                                     int currentTime = cal.get(Calendar.HOUR_OF_DAY) * 100 + cal.get(Calendar.MINUTE);
                                     if(driver.getTime() < currentTime)
                                         Toast.makeText(DriverActivity.this, "Too Late for that, Fancy Time Travelling??", Toast.LENGTH_SHORT).show();
+                                    else
+                                    {
+                                        //Date is valid
+                                        int selectDate = year;
+                                        selectDate *= 100;
+                                        selectDate += month+1;
+                                        selectDate *= 100;
+                                        selectDate += dayOfMonth;
+
+                                        driver.setDate(selectDate);
+                                        checks[4] = true;
+
+                                        // month parameter starts from 0
+                                        date.setText("Date:\n"+dayOfMonth+" "+getMonth(month+1)+" "+year );
+                                    }
 
                                 }
                                 else
@@ -342,7 +361,6 @@ public class DriverActivity extends AppCompatActivity {
 
                                     // month parameter starts from 0
                                     date.setText("Date:\n"+dayOfMonth+" "+getMonth(month+1)+" "+year );
-                                    dateEnter.setVisibility(View.INVISIBLE);
                                 }
                             }
 
@@ -409,7 +427,8 @@ public class DriverActivity extends AppCompatActivity {
                     myRef.child(user_id).setValue(driver);
 
                     // TODO determine where to go from here...
-
+                    showRequestView();
+                    checkRideTime();
 
                 }
                 else

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/nameODriver"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:text="Name o'Driver"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/rv_driverFrom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="from:"
+        app:layout_constraintStart_toStartOf="@+id/nameODriver"
+        app:layout_constraintTop_toBottomOf="@+id/nameODriver" />
+
+    <TextView
+        android:id="@+id/rv_driverTo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="to:"
+        app:layout_constraintStart_toStartOf="@+id/nameODriver"
+        app:layout_constraintTop_toBottomOf="@+id/rv_driverFrom" />
+
+    <Button
+        android:id="@+id/rv_driver_seeOnMap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="32dp"
+        android:text="See on map"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nameODriver" />
+
+    <Button
+        android:id="@+id/rv_pickPassengerPickupLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Pick your pickup location"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rv_pass_date" />
+
+    <Button
+        android:id="@+id/rv_reqDriverByPassenger"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:text="Request"
+        app:layout_constraintEnd_toEndOf="@+id/rv_driver_seeOnMap"
+        app:layout_constraintTop_toBottomOf="@+id/rv_driver_seeOnMap" />
+
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="409dp"
+        android:layout_height="1dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="1dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rv_pickPassengerPickupLocation" />
+
+    <TextView
+        android:id="@+id/rv_numberOfSeatsRemain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Number of seats remaining:"
+        app:layout_constraintStart_toStartOf="@+id/nameODriver"
+        app:layout_constraintTop_toBottomOf="@+id/rv_driverTo" />
+
+    <TextView
+        android:id="@+id/rv_pass_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Time:"
+        app:layout_constraintStart_toStartOf="@+id/nameODriver"
+        app:layout_constraintTop_toBottomOf="@+id/rv_numberOfSeatsRemain" />
+
+    <TextView
+        android:id="@+id/rv_pass_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Date:"
+        app:layout_constraintStart_toStartOf="@+id/nameODriver"
+        app:layout_constraintTop_toBottomOf="@+id/rv_pass_time" />
+
+    <TextView
+        android:id="@+id/rv_pickLocDisp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/rv_pickPassengerPickupLocation"
+        app:layout_constraintTop_toTopOf="@+id/rv_pickPassengerPickupLocation" />
+</androidx.constraintlayout.widget.ConstraintLayout>
