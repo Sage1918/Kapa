@@ -9,6 +9,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -31,16 +34,16 @@ import org.json.JSONObject;
 
 public class UserStandBy extends AppCompatActivity {
 
-    Button fb_logout_test;
     private String fb_id;
     private String fb_name;
     private String my_Uid;
     boolean isNewUser;
     private String userMode;
     private FirebaseDatabase database;
-    TextView greet;
+    TextView greet,beDriver,bePassenger;
     Button driver,passenger;
-
+    Menu menu;
+    UserModel newUser;
 
 
     @Override
@@ -48,17 +51,24 @@ public class UserStandBy extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_stand_by);
 
-        // Logout Button... Currently facebook only
-        fb_logout_test = findViewById(R.id.LogoutTest);
-        fb_logout_test.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LoginManager.getInstance().logOut();
-                startActivity(new Intent(UserStandBy.this,MainActivity.class));
-                finish();
-            }
-        });
+        driver = findViewById(R.id.DriverButton);
+        passenger = findViewById(R.id.PassengerButton);
+        beDriver = findViewById(R.id.BeDriver);
+        bePassenger = findViewById(R.id.BePassenger);
+        greet = findViewById(R.id.greet);
 
+        //
+        hideViews();
+
+        // If we came back from Driver before Confirming Driver...
+        Intent intent = getIntent();
+        if(intent.getStringExtra("back")!=null)
+        {
+            my_Uid = intent.getStringExtra("user_id");
+            fb_name = intent.getStringExtra("name");
+
+            getDetails(my_Uid,false);
+        }
 
         // Accessing the Graph API to get fb_id and fb_name. Here we create a request and later execute it Asynchronously
 
@@ -72,7 +82,7 @@ public class UserStandBy extends AppCompatActivity {
                             if (jsonObject != null) {
                                 fb_id = jsonObject.getString("id");
                                 fb_name = jsonObject.getString("name");
-                                greet = findViewById(R.id.greet);
+
                                 greet.setText("Hello "+fb_name);
 
 
@@ -90,16 +100,16 @@ public class UserStandBy extends AppCompatActivity {
                                             if(!snapshot.exists())
                                             {
                                                 isNewUser = true;
-
                                             }
                                             else
                                             {
-                                                // TODO: Get the mode of the User if it is None prompt them to select a mode. If mode is already selected then move to corresponding Activity
+                                                // Done: Get the mode of the User if it is None prompt them to select a mode. If mode is already selected then move to corresponding Activity
                                                 for( DataSnapshot ss : snapshot.getChildren())
                                                 {
                                                     my_Uid = ss.child("userid").getValue().toString();
                                                     isNewUser = false;
                                                 }
+
                                             }
 
                                             if(isNewUser)
@@ -112,7 +122,7 @@ public class UserStandBy extends AppCompatActivity {
                                             {
                                                 Log.d("Database Search RESULT", "SEARCHED and FOUND");
 
-                                                getDetails(my_Uid);
+                                                getDetails(my_Uid,false);
                                             }
                                         }
 
@@ -148,11 +158,87 @@ public class UserStandBy extends AppCompatActivity {
 
     }
 
-    private void getDetails(String id) {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu,menu);
 
-        DatabaseReference myRef = database.getReference("user").child(id);
-        Query query = myRef.orderByChild("mode");
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        return  true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId())
+        {
+            case R.id.mn_Logout:
+                LoginManager.getInstance().logOut();
+                startActivity(new Intent(UserStandBy.this,MainActivity.class));
+                finish();
+                break;
+            case R.id.mn_addFriends:
+                Intent intent = new Intent(UserStandBy.this,AddFriends.class);
+                intent.putExtra("user_id",my_Uid);
+                intent.putExtra("user_name",fb_name);
+                startActivity(intent);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void getDetails(String id,boolean justAdded) {
+
+        if(justAdded)
+        {
+            userMode = newUser.getMode();
+            if (userMode.equals("None")) {
+
+                driver.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent i = new Intent(UserStandBy.this, DriverActivity.class);
+                        i.putExtra("userid", id);
+                        i.putExtra("name", fb_name);
+
+                        startActivity(i);
+                        finish();
+                    }
+                });
+
+                passenger.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent i = new Intent(UserStandBy.this, PassengerActivity.class);
+                        i.putExtra("userid", id);
+                        i.putExtra("name", fb_name);
+
+                        startActivity(i);
+                        finish();
+                    }
+                });
+            }
+            else if (userMode.equals("Driver")) {
+                Intent i = new Intent(UserStandBy.this, DriverActivity.class);
+                i.putExtra("userid", id);
+                i.putExtra("name", fb_name);
+
+                startActivity(i);
+                finish();
+            }
+            else if (userMode.equals("Passenger"))
+            {
+                Intent i = new Intent(UserStandBy.this, PassengerActivity.class);
+                i.putExtra("userid", id);
+                i.putExtra("name", fb_name);
+
+                startActivity(i);
+                finish();
+            }
+        }
+        else
+        {
+            DatabaseReference myRef = database.getReference("user").child(id);
+            Query query = myRef.orderByChild("mode");
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot i : snapshot.getChildren())
@@ -160,8 +246,7 @@ public class UserStandBy extends AppCompatActivity {
                     userMode = i.getValue().toString();
 
                 if (userMode.equals("None")) {
-                    driver = findViewById(R.id.DriverButton);
-                    passenger = findViewById(R.id.PassengerButton);
+                    unHideViews();
 
                     driver.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -170,50 +255,51 @@ public class UserStandBy extends AppCompatActivity {
                             i.putExtra("userid", id);
                             i.putExtra("name", fb_name);
 
-                            startActivity(i);
-                            finish();
-                        }
-                    });
+                                startActivity(i);
+                                finish();
+                            }
+                        });
 
-                    passenger.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent i = new Intent(UserStandBy.this, PassengerActivity.class);
-                            i.putExtra("userid", id);
-                            i.putExtra("name", fb_name);
+                        passenger.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent i = new Intent(UserStandBy.this, PassengerActivity.class);
+                                i.putExtra("userid", id);
+                                i.putExtra("name", fb_name);
 
-                            startActivity(i);
-                            finish();
-                        }
-                    });
-                }
-                else if (userMode.equals("Driver")) {
-                    Intent i = new Intent(UserStandBy.this, DriverActivity.class);
-                    i.putExtra("userid", id);
-                    i.putExtra("name", fb_name);
+                                startActivity(i);
+                                finish();
+                            }
+                        });
+                    }
+                    else if (userMode.equals("Driver")) {
+                        Intent i = new Intent(UserStandBy.this, DriverActivity.class);
+                        i.putExtra("userid", id);
+                        i.putExtra("name", fb_name);
 
-                    startActivity(i);
-                    finish();
-                }
-                else if (userMode.equals("Passenger"))
-                {
-                    Intent i = new Intent(UserStandBy.this, PassengerActivity.class);
-                    i.putExtra("userid", id);
-                    i.putExtra("name", fb_name);
+                        startActivity(i);
+                        finish();
+                    }
+                    else if (userMode.equals("Passenger"))
+                    {
+                        Intent i = new Intent(UserStandBy.this, PassengerActivity.class);
+                        i.putExtra("userid", id);
+                        i.putExtra("name", fb_name);
 
-                    startActivity(i);
-                    finish();
-                }
-                else
+                        startActivity(i);
+                        finish();
+                    }
+                    else
                     Log.e("MAJOR ERROR","Something wrong with user mode from Database");
 
-            }
+                }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("Database",error.getMessage());
-            }
-        });
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e("Database",error.getMessage());
+                }
+            });
+        }
     }
 /*
     //private void searchDb(String f_id)
@@ -226,6 +312,7 @@ public class UserStandBy extends AppCompatActivity {
  */
 
     private void addNewUser() {
+        unHideViews();
 
         // Added the login Details of new users to login node
         d("ACCESS VALUE(ADD USER)",fb_id);
@@ -238,11 +325,11 @@ public class UserStandBy extends AppCompatActivity {
         login.setLoginId(fb_id);
         login.setLoginType("fb");
         dbRef.child(fb_id).setValue(login);
-        Toast.makeText(this, "Finished part 1/3 database", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Finished part 1/3 database", Toast.LENGTH_SHORT).show();
 
         // Added New user to user node of database
 
-        UserModel newUser = new UserModel();
+        newUser = new UserModel();
         newUser.setUname(fb_name);
         newUser.setUserStrId(newId);
         newUser.setMode("None");
@@ -250,9 +337,10 @@ public class UserStandBy extends AppCompatActivity {
         dbRef = FirebaseDatabase.getInstance("https://kapa-ce822-default-rtdb.asia-southeast1.firebasedatabase.app/")
                 .getReference("user");
         dbRef.child(newId).setValue(newUser);
-        Toast.makeText(this, "Finished part 2/3 database", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Finished part 2/3 database", Toast.LENGTH_SHORT).show();
 
-        // TODO add friends to database
+        getDetails(fb_id,true);
+
     /*
         GraphRequest friendsReq = GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONArrayCallback() {
             @Override
@@ -273,6 +361,22 @@ public class UserStandBy extends AppCompatActivity {
 
             */
     }
+
+    private void hideViews()
+    {
+        beDriver.setVisibility(View.INVISIBLE);
+        bePassenger.setVisibility(View.INVISIBLE);
+         driver.setVisibility(View.INVISIBLE);
+         passenger.setVisibility(View.INVISIBLE);
+    }
+
+    private void unHideViews()
+    {
+        beDriver.setVisibility(View.VISIBLE);
+        bePassenger.setVisibility(View.VISIBLE);
+         driver.setVisibility(View.VISIBLE);
+         passenger.setVisibility(View.VISIBLE);
+    }
 /*
     private void getFriends()
     {
@@ -288,7 +392,6 @@ public class UserStandBy extends AppCompatActivity {
                     {
                         try {
                             JSONObject object = jsonArray.getJSONObject(i);
-                            // TODO change this temp value
                             String Uid = "temp";
                             FriendsModel newFriend = new FriendsModel(
                                     object.getString("name"),

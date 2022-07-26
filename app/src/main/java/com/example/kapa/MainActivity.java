@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
                         // App code
                         // This will be changed to check with the database whether the account is already registered or is it new, Before moving to next activity.
-                        // TODO check database and move on with life
+                        // Done: check database and move on with life
 
 
                         startActivity(new Intent(MainActivity.this,UserStandBy.class));

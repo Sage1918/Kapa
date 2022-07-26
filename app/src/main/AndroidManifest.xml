@@ -12,9 +12,11 @@
         android:roundIcon="@mipmap/ic_kapa_logo_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Kapa">
-
+        <activity
+            android:name=".AddFriends"
+            android:exported="false" />
         <!--
-             TODO: Before you run your application, you need a Google Maps API key.
+             Done: Before you run your application, you need a Google Maps API key.
 
              To get one, follow the directions here:
 

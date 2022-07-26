@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:title="@string/settings"
-        android:id="@+id/Settings"
-        android:icon="@drawable/ic_settings_icon"
-        app:showAsAction="always"
-        />
+    <item android:title="Add friends"
+        android:id="@+id/mn_addFriends"/>
+    <item android:title="Log Out"
+        android:id="@+id/mn_Logout"/>
 
 </menu>

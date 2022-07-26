@@ -16,6 +16,9 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -24,6 +27,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.facebook.login.LoginManager;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -48,6 +52,8 @@ public class DriverActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager layoutManager;
     private boolean[] checks;
     private DriverModel driver;
+    private boolean isPermanent;
+    private long backPressedTime;
 
     Calendar cal;
     List<MyRequestModel> myRequestModelList;
@@ -95,6 +101,7 @@ public class DriverActivity extends AppCompatActivity {
         user_id = getIntent().getStringExtra("userid");
         fb_name = getIntent().getStringExtra("name");
         database = FirebaseDatabase.getInstance("https://kapa-ce822-default-rtdb.asia-southeast1.firebasedatabase.app");
+        isPermanent = false;
 
         // Initialising all text views in the layout
         ready = findViewById(R.id.readyMsg);
@@ -117,7 +124,7 @@ public class DriverActivity extends AppCompatActivity {
         // Initialising all editTexts in the layout
         noOfSeatsEnter = findViewById(R.id.noOfSeatsEnteredByDriver);
 
-        // Intialise the list of Requests
+        // Initialise the list of Requests
         myRequestModelList = new ArrayList<MyRequestModel>();
 
         // Initialising recycler view
@@ -130,8 +137,6 @@ public class DriverActivity extends AppCompatActivity {
         // Using a linear layout... i don't know why ??
         recyclerView.setLayoutManager(layoutManager);
 
-        // Passing an object to an inner class requires it to be final, so android studio made me do this.
-        final String[] dbTime = new String[1];
 
         checks = new boolean[5];
         for(int i=0;i<3;++i)
@@ -153,6 +158,7 @@ public class DriverActivity extends AppCompatActivity {
                 {
                     // Driver already set up driving
                     // Check whether it's time for ride first, followed by any more requests
+                    isPermanent = true;
                     checkRideTime();
                 }
             }
@@ -162,6 +168,64 @@ public class DriverActivity extends AppCompatActivity {
                 Log.e("Database",error.getMessage());
             }
         });
+    }
+    @Override
+    public void onBackPressed()
+    {
+        // If user have confirmed in becoming driver of Carpool then back button will not goto mode selection
+        if(isPermanent)
+        {
+
+            if(backPressedTime + 2000 > System.currentTimeMillis())
+            {
+                super.onBackPressed();
+                return;
+            }
+            else
+                Toast.makeText(DriverActivity.this,"Press Back again to exit",Toast.LENGTH_SHORT).show();
+
+            backPressedTime = System.currentTimeMillis();
+        }
+        // If user is yet to have confirmed then they may go back and change to passenger or something
+        else
+        {
+            // rerolling the changes to database entries and restarting the mode selection activity with the required parameters.
+            database.getReference("user").child(user_id).child("mode").setValue("None");
+            DatabaseReference myRef = database.getReference("driver");
+            myRef.child(user_id).removeValue();
+            Intent intent = new Intent(DriverActivity.this,UserStandBy.class);
+            intent.putExtra("user_id",user_id);
+            intent.putExtra("name",fb_name);
+            startActivity(intent);
+            finish();
+        }
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu,menu);
+
+        return  true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId())
+        {
+            case R.id.mn_Logout:
+                LoginManager.getInstance().logOut();
+                startActivity(new Intent(DriverActivity.this,MainActivity.class));
+                finish();
+                break;
+            case R.id.mn_addFriends:
+                // TODO add friends
+                Intent intent = new Intent(DriverActivity.this,AddFriends.class);
+                intent.putExtra("user_id",user_id);
+                intent.putExtra("user_name",fb_name);
+                startActivity(intent);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void checkRideTime() {
@@ -243,7 +307,6 @@ public class DriverActivity extends AppCompatActivity {
     }
 
     private void addDriver() {
-        //TODO add the driver to database
         showAddDriverView();
         DatabaseReference myRef = database.getReference("driver");
 
@@ -427,6 +490,7 @@ public class DriverActivity extends AppCompatActivity {
                     myRef.child(user_id).setValue(driver);
 
                     // TODO determine where to go from here...
+                    isPermanent = true;
                     showRequestView();
                     checkRideTime();
 
@@ -470,7 +534,6 @@ public class DriverActivity extends AppCompatActivity {
 
     void showRequestView()
     {
-        // TODO changes the layout to show all Views that are need to be shown to facilitate accepting and rejecting of ride requests from the passengers
         // This will be displayed by the Recycler View
         ready.setVisibility(View.INVISIBLE);
         start.setVisibility(View.INVISIBLE);

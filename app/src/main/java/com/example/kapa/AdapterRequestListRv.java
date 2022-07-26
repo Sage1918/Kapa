@@ -16,6 +16,8 @@ import java.util.List;
 
 public class AdapterRequestListRv extends RecyclerView.Adapter<AdapterRequestListRv.MyViewHolder> {
 
+    // The adapter for the recycle view that displays the list of passengers that request a driver for
+    // carpool. it also includes buttons to see the location on map, accept and reject.
     List<MyRequestModel> myRequestModelList;
     Context context;
 
@@ -53,7 +55,6 @@ public class AdapterRequestListRv extends RecyclerView.Adapter<AdapterRequestLis
                 i.putExtra("lat",lt);
                 i.putExtra("log",lg);
 
-                // TODO goto Map Activity and show the location
                 context.startActivity(i);
             }
         });
@@ -62,6 +63,16 @@ public class AdapterRequestListRv extends RecyclerView.Adapter<AdapterRequestLis
             @Override
             public void onClick(View v) {
                 // TODO accept the passenger and add to final carpool node. May disable both accept and reject button for this entry now...
+
+                holder.rv_reject.setVisibility(View.INVISIBLE);
+                holder.rv_accept.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        holder.rv_reject.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO reject the passenger and convey the meaning to the passenger side
 
                 holder.rv_reject.setVisibility(View.INVISIBLE);
                 holder.rv_accept.setVisibility(View.INVISIBLE);

@@ -75,7 +75,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void seeOnMap() {
-        // TODO make intent things visible on map
+        // Done for Driver and some passenger make intent things visible on map
         mMap.clear();
         Intent i = getIntent();
         Double lt, lg;
@@ -121,7 +121,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     Toast.makeText(MapsActivity.this, "Please Select a place first", Toast.LENGTH_SHORT).show();
                 else
                 {
-                    // TODO return the x and y coordinates to the other activity
+                    // Done return the x and y coordinates to the other activity
                     Intent intent = new Intent();
                     intent.putExtra("latitude",myMarker.latitude);
                     intent.putExtra("longitude",myMarker.longitude);

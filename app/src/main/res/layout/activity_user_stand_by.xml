@@ -23,17 +23,18 @@
         android:id="@+id/BeDriver"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="584dp"
+        android:layout_marginTop="32dp"
         android:text="Would you rather drive the car in Car pool..."
         android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/greet" />
 
     <Button
         android:id="@+id/DriverButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
+        android:layout_marginEnd="16dp"
         android:text="I'll Drive"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/BeDriver" />
@@ -54,28 +55,17 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
         android:text="I'll Ride"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/DriverButton"
+        app:layout_constraintStart_toStartOf="@+id/DriverButton"
         app:layout_constraintTop_toBottomOf="@+id/BePassenger" />
-
-    <Button
-        android:id="@+id/LogoutTest"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Logout test"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
 
     <TextView
         android:id="@+id/greet"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="168dp"
-        android:layout_marginEnd="185dp"
+        android:layout_marginTop="16dp"
         android:text="Hello "
-        app:layout_constraintBottom_toTopOf="@+id/BeDriver"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView4" />
 
