@@ -8,10 +8,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -21,12 +28,18 @@ public class AdapterPassengerReq extends RecyclerView.Adapter<AdapterPassengerRe
     Context context;
     ActivityResultLauncher<Intent> activityResultLauncher;
     double lt,lg;
+    String myName;
+    String myId;
+    boolean flag;
 
 
-    public AdapterPassengerReq(List<DriverModel> myFriends, Context context,ActivityResultLauncher<Intent> a) {
+    public AdapterPassengerReq(List<DriverModel> myFriends, Context context,ActivityResultLauncher<Intent> a, String myname,String myId) {
         this.myFriends = myFriends;
         this.context = context;
         this.activityResultLauncher = a;
+        this.myName = myname;
+        this.myId = myId;
+        this.flag = false;
     }
 
     @NonNull
@@ -45,7 +58,10 @@ public class AdapterPassengerReq extends RecyclerView.Adapter<AdapterPassengerRe
                                     + "\nLongitude: " + String.valueOf(myFriends.get(position).getFrom_longitude())));
         holder.rv_pass_to.setText("To:\nLatitude: " + String.valueOf(myFriends.get(position).getTo_latitude()
                 + "\nLongitude: " + String.valueOf(myFriends.get(position).getTo_longitude())));
-        holder.rv_pass_nos.setText(String.valueOf(myFriends.get(position).getNumberOfSeats()));
+        holder.rv_pass_nos.setText("Number of Seats: " + String.valueOf(myFriends.get(position).getNumberOfSeats()));
+        holder.rv_pass_time.setText("time: " + String.valueOf(myFriends.get(position).getTime()/100) + ":" + ((myFriends.get(position).getTime()%100 < 10)? "0"+String.valueOf(myFriends.get(position).getTime()%100):String.valueOf(myFriends.get(position).getTime()%100)));
+        holder.rv_pass_date.setText("date: "+String.valueOf(myFriends.get(position).getDate()%100)+getMonth((myFriends.get(position).getDate()%10000)/100) +String.valueOf(myFriends.get(position).getDate()/10000));
+
 
 
         holder.rv_pass_seeOnMap.setOnClickListener(new View.OnClickListener() {
@@ -79,9 +95,80 @@ public class AdapterPassengerReq extends RecyclerView.Adapter<AdapterPassengerRe
                 i.putExtra("selecting","pickup");
                 activityResultLauncher.launch(i);
 
+                holder.rv_pass_pickLocDisp.setVisibility(View.INVISIBLE);
                 holder.rv_pass_pickLocDisp.setText("Location Chosen\nlat: " + lt + "\nlog: " + lg);
+                flag = true;
             }
         });
+
+        holder.rv_pass_request.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                DatabaseReference newMyRef =  FirebaseDatabase.getInstance("https://kapa-ce822-default-rtdb.asia-southeast1.firebasedatabase.app").getReference("carpool");
+                newMyRef.child(myId).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.exists())
+                        {
+                            Toast.makeText(context, "You are already in a Carpool", Toast.LENGTH_SHORT).show();
+                        }
+                        else
+                        {
+                            if(flag)
+                            {
+                                DatabaseReference myRef = FirebaseDatabase.getInstance("https://kapa-ce822-default-rtdb.asia-southeast1.firebasedatabase.app").getReference("request");
+                                MyRequestModel newModel = new MyRequestModel(myFriends.get(position).getUser_id(),myId,myName,lt,lg);
+                                myRef.child(myFriends.get(position).getUser_id()).child(myId).setValue(newModel);
+
+                                Toast.makeText(context, "Request sent", Toast.LENGTH_SHORT).show();
+                                holder.rv_pass_pickupLoc.setVisibility(View.INVISIBLE);
+                                holder.rv_pass_request.setVisibility(View.INVISIBLE);
+                            }
+                            else
+                                Toast.makeText(context, "Enter the place you prefer to get picked up from", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+            }
+        });
+    }
+
+    private String getMonth(int i) {
+        switch (i)
+        {
+            case 1:
+                return "Jan";
+            case 2:
+                return "Feb";
+            case 3:
+                return "Apr";
+            case 4:
+                return "Mar";
+            case 5:
+                return "May";
+            case 6:
+                return "Jun";
+            case 7:
+                return "Jul";
+            case 8:
+                return "Aug";
+            case 9:
+                return "Sep";
+            case 10:
+                return "Oct";
+            case 11:
+                return "Nov";
+            case 12:
+                return "Dec";
+        }
+        return  "Non";
     }
 
     @Override
@@ -116,5 +203,10 @@ public class AdapterPassengerReq extends RecyclerView.Adapter<AdapterPassengerRe
             rv_pass_pickupLoc = itemView.findViewById(R.id.rv_pickPassengerPickupLocation);
             rv_pass_request = itemView.findViewById(R.id.rv_reqDriverByPassenger);
         }
+    }
+
+    public void updateView()
+    {
+
     }
 }

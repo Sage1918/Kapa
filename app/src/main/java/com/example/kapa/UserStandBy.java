@@ -96,7 +96,6 @@ public class UserStandBy extends AppCompatActivity {
                                     query.addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                            Log.d("SNAPSHOT exist or Nah",(snapshot.exists())?"True":"False");
                                             if(!snapshot.exists())
                                             {
                                                 isNewUser = true;
@@ -114,14 +113,10 @@ public class UserStandBy extends AppCompatActivity {
 
                                             if(isNewUser)
                                             {
-                                                Log.d("Database Search RESULT","SEARCHED and NOT FOUND");
-                                                Log.d("Value of FBID",fb_id);
                                                 addNewUser();
                                             }
                                             else
                                             {
-                                                Log.d("Database Search RESULT", "SEARCHED and FOUND");
-
                                                 getDetails(my_Uid,false);
                                             }
                                         }
@@ -140,7 +135,6 @@ public class UserStandBy extends AppCompatActivity {
 
 
 
-                                Log.d("isNewUser",(isNewUser)?"Ture":"Flase");
 
 
                             }

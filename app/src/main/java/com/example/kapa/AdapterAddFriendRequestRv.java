@@ -48,8 +48,9 @@ public class AdapterAddFriendRequestRv extends RecyclerView.Adapter<AdapterAddFr
                 myRef.child(myReqlist.get(position).getToUid()).child("my_id").setValue(myReqlist.get(position).getToUid());
                 myRef.child(myReqlist.get(position).getToUid()).child(myReqlist.get(position).getFromUid()).setValue(myReqlist.get(position).getFromUid());
                 myRef.child(myReqlist.get(position).getFromUid()).child("my_id").setValue(myReqlist.get(position).getFromUid());
-                myRef.child(myReqlist.get(position).getFromUid()).child(myReqlist.get(position).getFromUid()).setValue(myReqlist.get(position).getFromUid());
+                myRef.child(myReqlist.get(position).getFromUid()).child(myReqlist.get(position).getToUid()).setValue(myReqlist.get(position).getToUid());
                 holder.rv_addFrd_accept.setVisibility(View.INVISIBLE);
+                holder.rv_addFrd_reject.callOnClick();
                 holder.rv_addFrd_reject.setVisibility(View.INVISIBLE);
             }
         });

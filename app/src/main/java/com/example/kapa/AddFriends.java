@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AddFriends extends AppCompatActivity {
-    // TODO add friends
+    // Done: add friends
 
     private String user_id;
     private String user_name;
@@ -60,6 +60,7 @@ public class AddFriends extends AppCompatActivity {
         af_rv_reqList.setHasFixedSize(true);
         friendReqModelList = new ArrayList<>();
 
+        af_myUid.setText("my Uid: "+user_id);
         database = FirebaseDatabase.getInstance("https://kapa-ce822-default-rtdb.asia-southeast1.firebasedatabase.app");
 
         af_seeFriendReq.setOnClickListener(new View.OnClickListener() {
@@ -96,7 +97,7 @@ public class AddFriends extends AppCompatActivity {
                     Toast.makeText(AddFriends.this, "Uid Not Valid", Toast.LENGTH_SHORT).show();
                 else
                 {
-                    // TODO search friend in database user and sent friend request if found else say friend/Uid not found
+                    // Done search friend in database user and sent friend request if found else say friend/Uid not found
                     String tempUid = af_et_uid.getText().toString();
                     DatabaseReference myRef = database.getReference("user");
                     Query query = myRef.orderByChild("userStrId").equalTo(tempUid);
@@ -165,6 +166,9 @@ public class AddFriends extends AppCompatActivity {
         DatabaseReference myRef = database.getReference("friend_req")
                 .child(frId).child(user_id);
         myRef.setValue(new FriendReqModel(frId,user_id,user_name));
+
+        Toast.makeText(this, "Request sent", Toast.LENGTH_SHORT).show();
+        af_et_uid.setText("");
     }
 
 }

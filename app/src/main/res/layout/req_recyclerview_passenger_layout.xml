@@ -29,7 +29,7 @@
         android:id="@+id/rv_driverTo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="32dp"
         android:text="to:"
         app:layout_constraintStart_toStartOf="@+id/nameODriver"
         app:layout_constraintTop_toBottomOf="@+id/rv_driverFrom" />
@@ -38,19 +38,19 @@
         android:id="@+id/rv_driver_seeOnMap"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="32dp"
+        android:layout_marginEnd="16dp"
         android:text="See on map"
+        app:layout_constraintBottom_toTopOf="@+id/rv_driverTo"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/nameODriver" />
+        app:layout_constraintTop_toBottomOf="@+id/rv_driverFrom" />
 
     <Button
         android:id="@+id/rv_pickPassengerPickupLocation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="Pick your pickup location"
+        android:layout_marginTop="32dp"
+        android:text="Select pickup location"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/rv_pass_date" />
 
@@ -58,10 +58,10 @@
         android:id="@+id/rv_reqDriverByPassenger"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="16dp"
         android:text="Request"
         app:layout_constraintEnd_toEndOf="@+id/rv_driver_seeOnMap"
-        app:layout_constraintTop_toBottomOf="@+id/rv_driver_seeOnMap" />
+        app:layout_constraintTop_toBottomOf="@+id/rv_numberOfSeatsRemain" />
 
     <View
         android:id="@+id/divider2"
@@ -79,7 +79,7 @@
         android:id="@+id/rv_numberOfSeatsRemain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="32dp"
         android:text="Number of seats remaining:"
         app:layout_constraintStart_toStartOf="@+id/nameODriver"
         app:layout_constraintTop_toBottomOf="@+id/rv_driverTo" />
@@ -106,7 +106,9 @@
         android:id="@+id/rv_pickLocDisp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/rv_pickPassengerPickupLocation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/rv_pickPassengerPickupLocation"
-        app:layout_constraintTop_toTopOf="@+id/rv_pickPassengerPickupLocation" />
+        app:layout_constraintTop_toBottomOf="@+id/rv_reqDriverByPassenger" />
 </androidx.constraintlayout.widget.ConstraintLayout>

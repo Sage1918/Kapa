@@ -2,11 +2,11 @@ package com.example.kapa;
 
 public class MyRequestModel {
 
-    public String driverId;
-    public String passengerId;
-    public String name;
-    public Double pickupLat;
-    public Double pickupLong;
+    private String driverId;
+    private String passengerId;
+    private String name;
+    private Double pickupLat;
+    private Double pickupLong;
 
     public MyRequestModel() {
     }

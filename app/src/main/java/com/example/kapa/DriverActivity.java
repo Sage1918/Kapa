@@ -158,6 +158,8 @@ public class DriverActivity extends AppCompatActivity {
                 {
                     // Driver already set up driving
                     // Check whether it's time for ride first, followed by any more requests
+                    driver = new DriverModel();
+                    driver = snapshot.getValue(DriverModel.class);
                     isPermanent = true;
                     checkRideTime();
                 }
@@ -253,13 +255,29 @@ public class DriverActivity extends AppCompatActivity {
                                 int myTime;
 
                                 myTime = cal.get(Calendar.HOUR_OF_DAY) * 100 + cal.get(Calendar.MINUTE);
-                                if (driver.getTime() > myTime) {
+                                // TODO: Dirty solution, please fix
+                                if (driver.getTime() - myTime <= 100) {
                                     showRequestView();
                                     seeRequests();
                                 } else {
                                     showReadyView();
-                                    // TODO start MapActivity accordingly...
+                                    // Done: start MapActivity accordingly...
                                     Toast.makeText(DriverActivity.this, "Time to start Carpool...", Toast.LENGTH_SHORT).show();
+                                    start.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            Intent intent = new Intent(DriverActivity.this,MapsActivity.class);
+                                            intent.putExtra("type","ride");
+                                            intent.putExtra("mode","driver");
+                                            intent.putExtra("user_id",user_id);
+                                            intent.putExtra("tolat",driver.getTo_latitude());
+                                            intent.putExtra("tolog",driver.getTo_longitude());
+                                            intent.putExtra("drid",driver.getUser_id());
+                                            startActivity(intent);
+                                            finish();
+                                        }
+                                    });
+
                                 }
                             }
                         }
@@ -293,7 +311,7 @@ public class DriverActivity extends AppCompatActivity {
                         myRequestModelList.add(temp);
                     }
 
-                    adapter = new AdapterRequestListRv(myRequestModelList, DriverActivity.this);
+                    adapter = new AdapterRequestListRv(myRequestModelList, DriverActivity.this,driver.getNumberOfSeats());
                     recyclerView.setAdapter(adapter);
                     recyclerView.setVisibility(View.VISIBLE);
                 }
@@ -530,6 +548,25 @@ public class DriverActivity extends AppCompatActivity {
     void showReadyView()
     {
         // TODO changes the layout to show all Views that are need to be shown when the present time equals the time of carpool
+        ready.setVisibility(View.VISIBLE);
+        start.setVisibility(View.VISIBLE);
+        reqMsg.setVisibility(View.INVISIBLE);
+        recyclerView.setVisibility(View.INVISIBLE);
+
+        driverDetail.setVisibility(View.INVISIBLE);
+        from.setVisibility(View.INVISIBLE);
+        to.setVisibility(View.INVISIBLE);
+        noOfSeats.setVisibility(View.INVISIBLE);
+        time.setVisibility(View.INVISIBLE);
+        date.setVisibility(View.INVISIBLE);
+
+        selectTo.setVisibility(View.INVISIBLE);
+        selectFrom.setVisibility(View.INVISIBLE);
+        done.setVisibility(View.INVISIBLE);
+
+        noOfSeatsEnter.setVisibility(View.INVISIBLE);
+        timeEnter.setVisibility(View.INVISIBLE);
+        dateEnter.setVisibility(View.INVISIBLE);
     }
 
     void showRequestView()

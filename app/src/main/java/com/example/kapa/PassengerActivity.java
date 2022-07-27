@@ -28,6 +28,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class PassengerActivity extends AppCompatActivity {
@@ -39,6 +40,7 @@ public class PassengerActivity extends AppCompatActivity {
 
                     if(result.getResultCode() == 102)
                     {
+                        isPermanent = true;
                         Intent intent = result.getData();
                         if(intent == null)
                             Log.e("Error","MAJOR ERROR");
@@ -53,48 +55,163 @@ public class PassengerActivity extends AppCompatActivity {
             });
     private String user_id;
     private String user_name;
+    private String drid;
     private FirebaseDatabase database;
     private RecyclerView recyclerView_passenger;
-    private RecyclerView recyclerView_pendingReq;
     private AdapterPassengerReq adapter;
     private List<DriverModel> friends;
     private Button toggle;
+    private boolean isPermanent;
+    private long backPressedTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_passenger);
+        isPermanent = false;
 
         Intent intent = getIntent();
         user_id = intent.getStringExtra("userid");
         user_name = intent.getStringExtra("name");
+
+        DatabaseReference newMyRef = FirebaseDatabase.getInstance("https://kapa-ce822-default-rtdb.asia-southeast1.firebasedatabase.app")
+                .getReference("user").child(user_id);
+        newMyRef.child("mode").setValue("Passenger");
+
+
         recyclerView_passenger = findViewById(R.id.rv_PassengerReq);
         recyclerView_passenger.setLayoutManager(new LinearLayoutManager(this));
         recyclerView_passenger.setHasFixedSize(true);
-        recyclerView_pendingReq = findViewById(R.id.pending_requests);
-        recyclerView_pendingReq.setLayoutManager(new LinearLayoutManager(this));
-
+        friends = new ArrayList<>();
         toggle = findViewById(R.id.toggle);
-        toggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(recyclerView_passenger.getVisibility() == View.VISIBLE)
-                    recyclerView_passenger.setVisibility(View.INVISIBLE);
-                else
-                    recyclerView_passenger.setVisibility(View.VISIBLE);
 
-                if(recyclerView_pendingReq.getVisibility() == View.VISIBLE)
-                    recyclerView_pendingReq.setVisibility(View.INVISIBLE);
-                else
-                    recyclerView_pendingReq.setVisibility(View.VISIBLE);
+        database = FirebaseDatabase.getInstance("https://kapa-ce822-default-rtdb.asia-southeast1.firebasedatabase.app");
+
+        DatabaseReference myRef = database.getReference("carpool");
+        Query query = myRef.orderByChild(user_id);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean some = false;
+                if(snapshot.exists())
+                for(DataSnapshot i : snapshot.getChildren())
+                {
+                    if(i.child("People").child(user_id).exists())
+                    {
+                        drid = i.child("People").child("drid").getValue(String.class);
+                        checkTime(drid);
+                        some = true;
+                    }
+                }
+
+                if(some)
+                {
+                    fillFriendList();
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
             }
         });
+    }
 
-        database = FirebaseDatabase.getInstance("https://kapa-ce822-default-rtdb.asia-southeast1.firebasedatabase.app");
-        DatabaseReference myRef = database.getReference("friend");
-        Query query = myRef.orderByChild("my_id").equalTo(user_id);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+    private void checkTime(String d) {
+        DatabaseReference myRef = database.getReference("driver");
+        Query query = myRef.orderByChild("user_id").equalTo(d);
+        query.addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.exists()) {
+                            DriverModel driver = null;
+                            for (DataSnapshot i : snapshot.getChildren()) {
+                                driver = i.getValue(DriverModel.class);
+                            }
+
+                            Calendar cal = Calendar.getInstance();
+                            int myDate = cal.get(cal.YEAR)*10000 + (cal.get(cal.MONTH)+1)*100 + cal.get(cal.DAY_OF_MONTH);
+                            Log.d("TodayDate",String.valueOf(myDate));
+
+                           if (driver.getDate() == myDate) {
+
+                                int myTime;
+
+                                myTime = cal.get(Calendar.HOUR_OF_DAY) * 100 + cal.get(Calendar.MINUTE);
+                                if (driver.getTime() - myTime <=200) {
+                                    // TODO start MapActivity accordingly...
+                                    Toast.makeText(PassengerActivity.this, "Time to start Carpool...", Toast.LENGTH_SHORT).show();
+                                    DriverModel finalDriver = driver;
+                                    toggle.setVisibility(View.VISIBLE);
+                                    recyclerView_passenger.setVisibility(View.INVISIBLE);
+                                    toggle.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            Intent intent = new Intent(PassengerActivity.this,MapsActivity.class);
+                                            intent.putExtra("type","ride");
+                                            intent.putExtra("mode","passenger");
+                                            intent.putExtra("user_id",user_id);
+                                            intent.putExtra("drid",finalDriver.getUser_id());
+                                            intent.putExtra("tolat", finalDriver.getTo_latitude());
+                                            intent.putExtra("tolog", finalDriver.getTo_longitude());
+                                            startActivity(intent);
+                                            finish();
+                                        }
+                                    });
+
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e("DatabaseERROR",error.getMessage());
+                    }
+                }
+        );
+
+    }
+
+    private void fillAdapterList(List<String> frndIdList) {
+        DatabaseReference myRef = database.getReference("driver");
+
+            Query query = myRef.orderByChild("user_id");
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.exists())
+                    {
+                        for(DataSnapshot j : snapshot.getChildren())
+                        {
+                            DriverModel newTemp = j.getValue(DriverModel.class);
+                            if(frndIdList.contains(newTemp.getUser_id()))
+                            friends.add(newTemp);
+                        }
+
+                        adapter = new AdapterPassengerReq(friends,PassengerActivity.this,activityResultLauncher,user_name,user_id);
+                        recyclerView_passenger.setAdapter(adapter);
+
+                    }
+                    else{
+                        Toast.makeText(PassengerActivity.this, "You don't have any friends. Add friends from the Settings menu", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+    }
+
+    private void fillFriendList()
+    {
+        DatabaseReference myRef = database.getReference("friend").child(user_id);
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()){
@@ -117,40 +234,37 @@ public class PassengerActivity extends AppCompatActivity {
 
             }
         });
-
     }
+    @Override
+    public void onBackPressed()
+    {
+        // If user have confirmed in becoming driver of Carpool then back button will not goto mode selection
+        if(isPermanent)
+        {
 
-    private void fillAdapterList(List<String> frndIdList) {
-        DatabaseReference myRef = database.getReference("driver");
+            if(backPressedTime + 2000 > System.currentTimeMillis())
+            {
+                super.onBackPressed();
+                return;
+            }
+            else
+                Toast.makeText(PassengerActivity.this,"Press Back again to exit",Toast.LENGTH_SHORT).show();
 
-            Query query = myRef.orderByChild("user_id");
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.exists())
-                    {
-                        for(DataSnapshot j : snapshot.getChildren())
-                        {
-                            DriverModel newTemp = j.getValue(DriverModel.class);
-                            if(frndIdList.contains(newTemp.getUser_id()))
-                            friends.add(newTemp);
-                        }
-
-                        adapter = new AdapterPassengerReq(friends,PassengerActivity.this,activityResultLauncher);
-                        recyclerView_passenger.setAdapter(adapter);
-
-                    }
-                    else{
-                        Toast.makeText(PassengerActivity.this, "You don't have any friends. Add friends from the Settings menu", Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-
+            backPressedTime = System.currentTimeMillis();
+        }
+        // If user is yet to have confirmed then they may go back and change to passenger or something
+        else
+        {
+            // rerolling the changes to database entries and restarting the mode selection activity with the required parameters.
+            database.getReference("user").child(user_id).child("mode").setValue("None");
+            DatabaseReference myRef = database.getReference("driver");
+            myRef.child(user_id).removeValue();
+            Intent intent = new Intent(PassengerActivity.this,UserStandBy.class);
+            intent.putExtra("user_id",user_id);
+            intent.putExtra("name",user_name);
+            startActivity(intent);
+            finish();
+        }
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -180,5 +294,5 @@ public class PassengerActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // TODO use MyREquest model when pushing to DATABASE
+
 }
