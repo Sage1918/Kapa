@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
@@ -32,13 +33,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -128,9 +131,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Intent i = getIntent();
            toLoc = new LatLng(i.getDoubleExtra("tolat",0), i.getDoubleExtra("tolog",0));
             toDestMarker();
-            if(driver)
-            startTracking();
-            else
+            if(driver) {
+                startTracking();
+            }
+            else  //user is passenger
             {
                 DatabaseReference myRef = FirebaseDatabase.getInstance("https://kapa-ce822-default-rtdb.asia-southeast1.firebasedatabase.app").getReference("location").child(drid);
                 myRef.addValueEventListener(new ValueEventListener() {
@@ -280,9 +284,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void updateGPS() {
 
-
-
-
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // Done: Consider calling
             //    ActivityCompat#requestPermissions
@@ -325,23 +326,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void startTracking()
     {
+        // Start tracking the location of the driver
         if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED)
             locationProvider.requestLocationUpdates(locationRequest,locationCallback, Looper.getMainLooper());
     }
 
     private void stopTracking()
     {
+        // Stop tracking the location of the driver
         locationProvider.removeLocationUpdates(locationCallback);
     }
 
-    private void drive(Location l)
+    private void drive(@NonNull Location l)
     {
+        // Updates the real time database with the location of the user(who happens to be the driver). This mehod is only called if the user is a driver and not a passenger.
         DatabaseReference myRef = FirebaseDatabase.getInstance("https://kapa-ce822-default-rtdb.asia-southeast1.firebasedatabase.app").getReference("location").child(user_id);
+
+        // Location model is a class that model how the location is stored in the database. Note: this class is defined in this java file itself(MapsActivity.java)
         myRef.setValue(new LocationModel(user_id,l.getLatitude(),l.getLongitude()));
         LatLng latLng ;
         latLng = new LatLng(l.getLatitude(),l.getLongitude());
+        // If there is no marker for driver on map already
         if(driverMarker == null)
         {
+            drawPath(latLng);
             MarkerOptions temp = new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
             driverMarker = mMap.addMarker(temp);
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,8f));
@@ -352,22 +360,83 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,15f));
         }
 
+        // toLoc is the location of the destination. This a CHEAP way of checking if the user has reached their destination, if yes stop tracking them.
         if(l.getLatitude() - toLoc.latitude < 0.00001 && l.getLongitude() - toLoc.longitude <0.00001)
             stopTracking();
     }
 
+    private void drawPath(LatLng latLng) {
+        // method to draw the route from start to finish if user is driver. Also finds distance travelled, calculates score and updates the database.
+        String url = Uri.parse("https://maps.googleapis.com/maps/api/directions/json")
+                .buildUpon()
+                .appendQueryParameter("destination",String.valueOf(toLoc.latitude)+","+String.valueOf(toLoc.longitude))
+                .appendQueryParameter("origin",String.valueOf(latLng.latitude)+","+String.valueOf(latLng.longitude))
+                .appendQueryParameter("mode","driving")
+                //Dirty solution, use strings or local properties
+                .appendQueryParameter("key","AIzaSyAXMh5cETuF4lrHi8NyBKf-WeLbCC33nTU")
+                .appendQueryParameter("units","metric")
+                .toString();
+        
+
+    }
+
     private void toDestMarker()
     {
+        // Adds the marker at the destination
         mMap.addMarker(new MarkerOptions().position(toLoc)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
     }
 
+    private List<LatLng> decodePolyline(String encoded)
+    {
+        /* The path as returned by the direction API will be compressed/shortened for easy transfer across the internet, the coordinates along the path
+         are encoded in base64 format which needs to be decoded to get the actual coordinates(See documentation for more detailed info.
+          This function takes in the encoded string(as found in the JSON returned by the API), decodes them and returns
+          a list of coordinates making up the path.
+
+          Credits to random stranger on the internet.*/
+
+        List<LatLng> coordinatesOfPath = new ArrayList<>();
+        int lat = 0,lng = 0;
+
+        for(int i=0,len = encoded.length(); i < len;)
+        {
+            int b,shift = 0,result = 0;
+            do{
+                b = encoded.charAt(i++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            }while(b >= 0x20);
+
+            int temp;
+            temp = ((result & 1) != 0 ? -(result >> 1) : (result >>1));
+            lat += temp;
+
+            shift = 0;
+            result = 0;
+            do{
+                b = encoded.charAt(i++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            }while(b >= 0x20);
+
+            temp = ((result & 1) != 0 ? -(result >> 1) : (result >>1));
+            lng += temp;
+
+            coordinatesOfPath.add(new LatLng((double)lat/1E5,(double)lng/1E5 ));
+        }
+
+        return coordinatesOfPath;
+    }
+
     public class LocationModel
     {
+        // Class that models how the location data is stored in the database.
         private String uid;
         private double lat;
         private double log;
 
+        //! An empty constructor for firebase code... DO NOT REMOVE...
         LocationModel()
         {
 
@@ -393,6 +462,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /*
+    // Deprecatated code... causes errors which are pain to remove.
     @Override
     protected void onStop() {
         if (type.equals("ride")) {
@@ -409,7 +479,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onBackPressed()
     {
-
+            // If user press back, don't let them go back to previous activity...
             if(backPressedTime + 2000 > System.currentTimeMillis())
             {
                 super.onBackPressed();
@@ -423,7 +493,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
+        // Something to do with permission, modify at your own risk...
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode)
         {

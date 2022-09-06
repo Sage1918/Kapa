@@ -89,10 +89,7 @@ public class AdapterRequestListRv extends RecyclerView.Adapter<AdapterRequestLis
                         {
                             DriverModel driver = null;
 
-                            for(DataSnapshot i : snapshot.getChildren())
-                            {
-                                driver = i.getValue(DriverModel.class);
-                            }
+                                driver = snapshot.getValue(DriverModel.class);
                             if(driver != null)
                             {
                                 DatabaseReference myRef =  FirebaseDatabase.getInstance("https://kapa-ce822-default-rtdb.asia-southeast1.firebasedatabase.app").getReference("driver").child(myRequestModelList.get(position).getDriverId());

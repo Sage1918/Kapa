@@ -104,7 +104,7 @@ public class PassengerActivity extends AppCompatActivity {
                     }
                 }
 
-                if(some)
+                if(!some)
                 {
                     fillFriendList();
                 }
