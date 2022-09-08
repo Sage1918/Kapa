@@ -132,17 +132,18 @@ public class PassengerActivity extends AppCompatActivity {
                             }
 
                             Calendar cal = Calendar.getInstance();
-                            int myDate = cal.get(cal.YEAR)*10000 + (cal.get(cal.MONTH)+1)*100 + cal.get(cal.DAY_OF_MONTH);
+                            int myDate = cal.get(Calendar.YEAR)*10000 + (cal.get(Calendar.MONTH)+1)*100 + cal.get(Calendar.DAY_OF_MONTH);
                             Log.d("TodayDate",String.valueOf(myDate));
 
-                           if (driver.getDate() == myDate) {
+                            assert driver != null;
+                            if (driver.getDate() == myDate) {
 
                                 int myTime;
 
                                 myTime = cal.get(Calendar.HOUR_OF_DAY) * 100 + cal.get(Calendar.MINUTE);
                                 if (driver.getTime() - myTime <=200) {
                                     // TODO start MapActivity accordingly...
-                                    Toast.makeText(PassengerActivity.this, "Time to start Carpool...", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(PassengerActivity.this, "Time to start Carpool...", Toast.LENGTH_LONG).show();
                                     DriverModel finalDriver = driver;
                                     toggle.setVisibility(View.VISIBLE);
                                     recyclerView_passenger.setVisibility(View.INVISIBLE);
