@@ -175,6 +175,12 @@ public class UserStandBy extends AppCompatActivity {
                 intent.putExtra("user_name",fb_name);
                 startActivity(intent);
                 break;
+            case R.id.mn_profile:
+                Intent intent1 = new Intent(UserStandBy.this,MyProfile.class);
+                intent1.putExtra("user_id",my_Uid);
+                intent1.putExtra("user_name",fb_name);
+                startActivity(intent1);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }

@@ -291,6 +291,12 @@ public class PassengerActivity extends AppCompatActivity {
                 intent.putExtra("user_name",user_name);
                 startActivity(intent);
                 break;
+                case R.id.mn_profile:
+                Intent intent1 = new Intent(PassengerActivity.this,MyProfile.class);
+                intent1.putExtra("user_id",user_id);
+                intent1.putExtra("user_name",user_name);
+                startActivity(intent1);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
