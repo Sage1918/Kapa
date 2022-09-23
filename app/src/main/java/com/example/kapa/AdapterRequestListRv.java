@@ -17,7 +17,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
@@ -41,8 +40,7 @@ public class AdapterRequestListRv extends RecyclerView.Adapter<AdapterRequestLis
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.req_recyclerview_layout,parent,false);
-        MyViewHolder holder = new MyViewHolder(view);
-        return holder;
+        return new MyViewHolder(view);
     }
 
     //Dirty way of solving the "position variable is not fixed" concern of Android Studio
@@ -87,7 +85,7 @@ public class AdapterRequestListRv extends RecyclerView.Adapter<AdapterRequestLis
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if(snapshot.exists())
                         {
-                            DriverModel driver = null;
+                            DriverModel driver;
 
                                 driver = snapshot.getValue(DriverModel.class);
                             if(driver != null)
@@ -121,6 +119,8 @@ public class AdapterRequestListRv extends RecyclerView.Adapter<AdapterRequestLis
 
                 holder.rv_reject.setVisibility(View.INVISIBLE);
                 holder.rv_accept.setVisibility(View.INVISIBLE);
+                myRequestModelList.remove(position);
+                notifyItemRemoved(position);
             }
         });
     }
@@ -149,4 +149,5 @@ public class AdapterRequestListRv extends RecyclerView.Adapter<AdapterRequestLis
             rv_seeOnMap = itemView.findViewById(R.id.rv_see_on_map);
         }
     }
+
 }

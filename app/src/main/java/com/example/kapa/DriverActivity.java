@@ -132,8 +132,8 @@ public class DriverActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
 
 
-        // The fixed size statement is to improve performance as it can be sure that it doesn't have to change size, see docs for more details...
-        recyclerView.setHasFixedSize(true);
+        // The fixed size statement is to improve performance as it can be sure that it doesn't have to change size(especially when it is true), see docs for more details...
+        recyclerView.setHasFixedSize(false);
         // Using a linear layout... i don't know why ??
         recyclerView.setLayoutManager(layoutManager);
 
@@ -159,7 +159,7 @@ public class DriverActivity extends AppCompatActivity {
                     // Driver already set up driving
                     // Check whether it's time for ride first, followed by any more requests
                     driver = new DriverModel();
-                    driver = snapshot.getValue(DriverModel.class);
+                    driver = snapshot.child(user_id).getValue(DriverModel.class);
                     isPermanent = true;
                     checkRideTime();
                 }
@@ -262,7 +262,7 @@ public class DriverActivity extends AppCompatActivity {
 
                                 myTime = cal.get(Calendar.HOUR_OF_DAY) * 100 + cal.get(Calendar.MINUTE);
                                 // TODO: Dirty solution, please fix
-                                if (driver.getTime() - myTime <= 100) {
+                                if (Math.abs(driver.getTime() - myTime) >= 100) {
                                     showRequestView();
                                     seeRequests();
                                 } else {
@@ -286,6 +286,21 @@ public class DriverActivity extends AppCompatActivity {
 
                                 }
                             }
+                            else
+                            {
+                                // Delete from driver and set mode as None...
+
+                                database.getReference("driver").child(user_id).removeValue();
+                                database.getReference("user").child(user_id).child("mode").setValue("None");
+                                Toast.makeText(DriverActivity.this, "You missed your last Carpool...", Toast.LENGTH_SHORT).show();
+                                Intent myintent = new Intent(DriverActivity.this,UserStandBy.class);
+                                myintent.putExtra("back","Time for carpool expired");
+                                myintent.putExtra("user_id",user_id);
+                                myintent.putExtra("name",fb_name);
+                                startActivity(myintent);
+                                finish();
+
+                            }
                         }
                     }
 
@@ -295,6 +310,7 @@ public class DriverActivity extends AppCompatActivity {
                     }
                 }
         );
+
     }
 
     private void seeRequests() {
@@ -317,9 +333,16 @@ public class DriverActivity extends AppCompatActivity {
                         myRequestModelList.add(temp);
                     }
 
-                    adapter = new AdapterRequestListRv(myRequestModelList, DriverActivity.this,driver.getNumberOfSeats());
-                    recyclerView.setAdapter(adapter);
-                    recyclerView.setVisibility(View.VISIBLE);
+                    if(adapter == null)
+                    {
+                        adapter = new AdapterRequestListRv(myRequestModelList, DriverActivity.this,driver.getNumberOfSeats());
+                        recyclerView.setAdapter(adapter);
+                        recyclerView.setVisibility(View.VISIBLE);
+                    }
+                    else
+                    {
+
+                    }
                 }
             }
 
@@ -509,7 +532,7 @@ public class DriverActivity extends AppCompatActivity {
 
                 if(allClear)
                 {
-                    Toast.makeText(DriverActivity.this, "You Entered Everything...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DriverActivity.this, "Car Pool Successfully created. Waiting for any new CarPool requests", Toast.LENGTH_SHORT).show();
                     database.getReference("user").child(user_id).child("mode").setValue("Driver");
                     myRef.child(user_id).setValue(driver);
 

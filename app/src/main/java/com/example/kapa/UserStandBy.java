@@ -190,6 +190,7 @@ public class UserStandBy extends AppCompatActivity {
         if(justAdded)
         {
             userMode = newUser.getMode();
+            my_Uid = id;
             if (userMode.equals("None")) {
 
                 driver.setOnClickListener(new View.OnClickListener() {

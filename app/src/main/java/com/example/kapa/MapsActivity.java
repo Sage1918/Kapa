@@ -86,6 +86,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        binding = ActivityMapsBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         type = getIntent().getStringExtra("type");
         if(type.equals("ride")) {
@@ -97,18 +99,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             {
                 driver = true;
             }
-            else
+            else {
                 driver = false;
+            }
         }
+
+        updateGPS();
 
         // Initialising request queue for giving requests to the Direction API to get distance and directions...
         // Request Queue, in the literal sense a queue of requests that the app gives...
         requestQueue = Volley.newRequestQueue(this);
-
-        updateGPS();
-
-        binding = ActivityMapsBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -408,7 +408,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void drive(@NonNull Location l)
     {
-        // Updates the real time database with the location of the user(who happens to be the driver). This mehod is only called if the user is a driver and not a passenger.
+        // Updates the real time database with the location of the user(who happens to be the driver). This method is only called if the user is a driver and not a passenger.
         DatabaseReference myRef = FirebaseDatabase.getInstance("https://kapa-ce822-default-rtdb.asia-southeast1.firebasedatabase.app").getReference("location").child(user_id);
 
         // Location model is a class that model how the location is stored in the database. Note: this class is defined in this java file itself(MapsActivity.java)
@@ -426,11 +426,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         else
         {
             driverMarker.setPosition(latLng);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,15f));
+            //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,15f));
         }
 
         // toLoc is the location of the destination. This a CHEAP way of checking if the user has reached their destination, if yes stop tracking them.
-        if(l.getLatitude() - toLoc.latitude < 0.00001 && l.getLongitude() - toLoc.longitude <0.00001)
+        // Note: The lattitude precision is not calibrated according to the longitude of the user. Since the equator is the entire circumference of earth,
+        // lattitude approximation taken here represent worst case scenario where the person is near the equator. For users further away from equator this
+        // will only result in greater lattitude precision and theoretically, no problems should arise out of this...
+        if(l.getLatitude() - toLoc.latitude < 0.0001 && l.getLongitude() - toLoc.longitude <0.0001)
             stopTracking();
     }
 
@@ -442,9 +445,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .appendQueryParameter("destination",String.valueOf(toLoc.latitude)+", "+String.valueOf(toLoc.longitude))
                 .appendQueryParameter("origin",String.valueOf(latLng.latitude)+", "+String.valueOf(latLng.longitude))
                 .appendQueryParameter("mode","driving")
+                .appendQueryParameter("units","metric")
                 //Dirty solution, use strings or local properties
                 .appendQueryParameter("key","AIzaSyAXMh5cETuF4lrHi8NyBKf-WeLbCC33nTU")
-                .appendQueryParameter("units","metric")
                 .toString();
 
         // Creating a JSON object Request
